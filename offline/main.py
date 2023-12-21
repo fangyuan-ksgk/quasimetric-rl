@@ -56,7 +56,7 @@ def train(dict_cfg: DictConfig):
     cfg: Conf = Conf.from_DictConfig(dict_cfg)
     writer = cfg.setup_for_experiment()  # checking & setup logging
 
-    dataset = cfg.env.make()
+    dataset = cfg.env.make() # Make the Environment -- seems to be problematic here
 
     # trainer
     dataloader_kwargs = dict(shuffle=True, drop_last=True)

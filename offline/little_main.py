@@ -22,15 +22,3 @@ from quasimetric_rl.modules import InfoT
 from quasimetric_rl.base_conf import BaseConf
 
 from .trainer import Trainer
-
-import hydra
-from omegaconf import OmegaConf
-
-
-@hydra.main(version_base=None, config_path='../experiment/', config_name='exp_cfg1')
-def my_app(cfg : DictConfig) -> None:
-    print(OmegaConf.to_yaml(cfg))
-
-
-if __name__ == "__main__":
-    my_app()
