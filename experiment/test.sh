@@ -1,1 +1,2 @@
-python -m hydra_test db=adele db.song=fuck_bitch_till_pregnant
+# Multirun & Composition of Config test with hydra package
+python hydra_test.py --multirun singer=mgk,adele
