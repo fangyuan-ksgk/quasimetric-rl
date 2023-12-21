@@ -1,7 +1,7 @@
 import hydra
 from omegaconf import OmegaConf, DictConfig
 base_path = '/Users/fangyuanyu/Implementation/Agent/quasimetric-rl'
-@hydra.main(version_base=None, config_path=f'{base_path}/experiment/', config_name='config')
+@hydra.main(version_base=None, config_path=f'{base_path}/experiment/hydra-config/', config_name='config')
 def my_app(cfg : DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
 
