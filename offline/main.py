@@ -27,6 +27,16 @@ from quasimetric_rl.base_conf import BaseConf
 
 from .trainer import Trainer
 
+# This Conf is the main bridge and folds up about everything:
+# -- environment can be directly obtained through cfg.env.make()
+# Trainer object contains everything:
+# -- environment, made from cfg.env.make() is passed into the Trainer
+# -- agent is initialized using config from cfg.agent
+# -- every other training-related config is also set inside the Trainer, step is done through: trainer.train_step(data)
+# -- even the training data is obtained through trainer.iter_training_data()
+# Breaking Tips:
+# 1. To break & play with the environment, change on the Conf, check the env.make() function
+# 2. To break & play with the model, check the Trainer object, the agent is initialized inside the Trainer
 
 @utils.singleton
 @attrs.define(kw_only=True)
@@ -56,6 +66,7 @@ def train(dict_cfg: DictConfig):
     cfg: Conf = Conf.from_DictConfig(dict_cfg)
     writer = cfg.setup_for_experiment()  # checking & setup logging
 
+    # Environment is made to be 'Dataset'??
     dataset = cfg.env.make() # Make the Environment -- seems to be problematic here
 
     # trainer
@@ -80,9 +91,9 @@ def train(dict_cfg: DictConfig):
         )
 
     trainer = Trainer(
-        agent_conf=cfg.agent,
+        agent_conf=cfg.agent,# this is the model / rl agent
         device=cfg.device.make(),
-        dataset=dataset,
+        dataset=dataset, # again this is the environment
         batch_size=cfg.batch_size,
         total_optim_steps=cfg.total_optim_steps,
         dataloader_kwargs=dataloader_kwargs,
@@ -150,19 +161,21 @@ def train(dict_cfg: DictConfig):
                 v = v.mean().item()
             writer.add_scalar(f"{prefix}{k}", v, optim_steps)
 
+    # Main Training Loop: Whateever happens above is just setup & sub-routines definition
     save(0, 0)
-    if start_epoch < num_total_epochs:
+    if start_epoch < num_total_epochs: # this is just to skip training if the ckpt has reached num_total_epochs
         for epoch in range(num_total_epochs):
             epoch_desc = f"Train epoch {epoch:05d}/{num_total_epochs:05d}"
             for it, (data, data_info) in enumerate(tqdm(trainer.iter_training_data(), total=trainer.num_batches, desc=epoch_desc)):
+                # the training data consists of tuple (data, info), stored inside the trainer.iter_training_data() list(?)
                 step_counter.update_then_record_alerts()
                 optim_steps += 1
 
-                if (epoch, it) <= (start_epoch, start_it):
+                if (epoch, it) <= (start_epoch, start_it): # lazy way to 'resume' from the ckpt epoch number... | equivalent to use num_epochs = total_num_epochs - ckpt_num_epochs
                     continue  # fast forward
                 else:
                     iter_t0 = time.time()
-                    train_info = trainer.train_step(data)
+                    train_info = trainer.train_step(data) # gradient update step
                     iter_time = time.time() - iter_t0
 
                 if step_counter.alerts.save:

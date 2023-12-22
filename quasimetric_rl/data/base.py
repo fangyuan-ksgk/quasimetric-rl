@@ -142,9 +142,18 @@ class EpisodeData(MultiEpisodeData):
 
 
 LOAD_EPISODES_REGISTRY: Mapping[Tuple[str, str], Callable[[], Iterator[EpisodeData]]] = {}
+# This function registers an empty map object (like a general dictionary) (king,name) -> create_env_fn
+# -- the create_env_fn() will gives a gym.Env object, [] indicates no input is required for the function
+# -- therefore the registered Map MUST have been given content somewhere else
 CREATE_ENV_REGISTRY: Mapping[Tuple[str, str], Callable[[], gym.Env]] = {}
 
-
+# This function is a util function to register the offline env, given create_env_fn / load_episodes_fn
+# -- must have been called to register the offline env
+# -- not called inside the base.py, but called in d4rl/maze2d.py (copilot ??)
+# -- if this func is called elsewhere, how is the local variable CREATE_ENV_REGISTRY updated?
+# -- seems like the CREATE_ENV_REGISTRY is a global variable, and is updated by this function
+# -- Q: why is it a global variable?
+# 
 def register_offline_env(kind: str, spec: str, *, load_episodes_fn, create_env_fn):
     r"""
     Each specific env (e.g., an offline env from d4rl) just needs to register
@@ -164,7 +173,9 @@ def register_offline_env(kind: str, spec: str, *, load_episodes_fn, create_env_f
     LOAD_EPISODES_REGISTRY[(kind, spec)] = load_episodes_fn
     CREATE_ENV_REGISTRY[(kind, spec)] = create_env_fn
 
-
+# .make() function converts name_config into an environment, wrapped in a Dataset object
+# --- recall that the quasi-RL requires ability to sample from initial/goal states, which is why such wrapper might be needed
+# we need to switch to some other environment compatible with M1 chips here
 class Dataset:
     @attrs.define(kw_only=True)
     class Conf:
@@ -174,10 +185,11 @@ class Dataset:
         name: str = MISSING  # maze2d-umaze-v1, etc.
 
         # Defines how to fetch the future observation. smaller -> more recent
+        # (? what distcount is this? - I only know of reward discount, but on observation?)
         future_observation_discount: float = attrs.field(default=0.99, validator=attrs.validators.and_(
             attrs.validators.ge(0.0),
             attrs.validators.le(1.0),
-        ))
+        )) # Clip on values
 
         def make(self, *, dummy: bool = False) -> 'Dataset':
             return Dataset(self.kind, self.name,
@@ -207,6 +219,8 @@ class Dataset:
     max_episode_length: int
     # -----
 
+    # It is quite strange, I don't think the CREATE_ENV_REGISTRY is defined (it is only initialized) for these 
+    #  specific kind & name, so how is the env created? 
     def create_env(self) -> gym.Env:
         return CREATE_ENV_REGISTRY[self.kind, self.name]()
 

@@ -36,9 +36,11 @@ def suppress_output():
 d4rl = None
 OfflineEnv = None
 
+# this simply doesn't work -- forget about it
 def lazy_init_d4rl():
     # d4rl requires mujoco_py, which has a range of installation issues.
     # do not load until needed.
+    # -- I am glad you realized that shit, then why not use some updated version?
 
     global d4rl, OfflineEnv
 
@@ -69,6 +71,7 @@ def load_environment(name: Union[str, gym.Env]) -> 'OfflineEnv':
     if type(name) != str:
         ## name is already an environment
         return name
+    # when name is a simple string, use gym.make(name) to create the environment here
     with suppress_output():
         wrapped_env: gym.Wrapper = gym.make(name)
     env: 'OfflineEnv' = wrapped_env.unwrapped

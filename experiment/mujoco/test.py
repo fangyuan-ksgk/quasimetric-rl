@@ -65,3 +65,7 @@ while data.time < duration:
     frames.append(pixels)
 
 media.show_video(frames, fps=framerate)
+
+
+# import gymnasium as gym
+import gymnasium_robotics

@@ -45,3 +45,22 @@ class Conf(BaseConf):
 cs = hydra.core.config_store.ConfigStore.instance()
 cs.store(name='config', node=Conf())
 
+# There is no reason why we would want to use other environments than the ones we have
+
+@pdb_if_DEBUG
+@hydra.main(version_base=None, config_name="config")
+def train(dict_cfg: DictConfig):
+    cfg: Conf = Conf.from_DictConfig(dict_cfg)
+    writer = cfg.setup_for_experiment()  # checking & setup logging
+    print(f'{("").join(["-"]*31)} Making Environment {("").join(["-"]*31)}')
+    dataset = cfg.env.make() # Make the Environment -- seems to be problematic here
+
+
+if __name__ == '__main__':
+    if 'MUJOCO_GL' not in os.environ:
+        os.environ['MUJOCO_GL'] = 'egl'
+
+    # set up some hydra flags before parsing
+    os.environ['HYDRA_FULL_ERROR'] = str(int(FLAGS.DEBUG))
+
+    train()
