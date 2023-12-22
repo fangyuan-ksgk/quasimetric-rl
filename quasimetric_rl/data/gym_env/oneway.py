@@ -10,18 +10,17 @@ import gym
 import gym.spaces
 
 from ..base import register_offline_env
-from . import load_environment, convert_dict_to_EpisodeData_iter, sequence_dataset
+from . import load_environment
+
+# I see no reason why we should restrict ourselves to anything less general than the gym environment itself....
+
+## An obstacle is to generate episodes from the gym environment
+## preprocess -> sequence_dataset -> convert_dict_to_EpisodeData_iter -> load_environment
+## How redundant is that??
 
 
-if TYPE_CHECKING:
-    import d4rl.pointmaze
-
-
-# Environment does NOT have a Policy right? So how can we obtain dataset without knowing how to act?
-# I think we need to generate episodes from the gym environment
 
 def preprocess_maze2d_fix(env: 'd4rl.pointmaze.MazeEnv', dataset: Mapping[str, np.ndarray]):
-    # If I can reach the goal, I will not need to run algorithm .....
     ## In generation, controller is run until reached goal, which is
     ## continuously set.
     ##
@@ -44,15 +43,6 @@ def preprocess_maze2d_fix(env: 'd4rl.pointmaze.MazeEnv', dataset: Mapping[str, n
     ##
     ## NB that this is different from diffuser code!
 
-    # dataset keys requirements: -- we need only construct such a dataset and that is it
-    #  observations: (N, 2) float32 array
-    #  actions: (N, 2) float32 array
-    #  rewards: (N,) float32 array
-    #  terminals: (N,) bool array
-    #  infos/goal: (N, 2) float32 array
-    #  infos/start: (N, 2) float32 array
-    #  infos/success: (N,) bool array
- 
     assert not np.any(dataset['terminals'])
     dataset['next_observations'] = dataset['observations'][1:]
 
@@ -93,28 +83,13 @@ def preprocess_maze2d_fix(env: 'd4rl.pointmaze.MazeEnv', dataset: Mapping[str, n
     return dataset
 
 
-# My guess is that the so-called dataset is precisely a replay-buffer, which collects historical datas
-# -- proof is there is not even a policy in the environment
-def load_episodes_maze2d(name):
-    env = load_environment(name)
-    # yield returns a generator
-    # yield from operates on a generator (defined through yield)
-    yield from convert_dict_to_EpisodeData_iter(
-        sequence_dataset(
-            env,
-            preprocess_maze2d_fix(
-                env,
-                env.get_dataset(), # This is weird by definition - what is the policy?? wait, unless it's excatly
-            ),
-        ),
-    )
+# This function should yield a generator of episodes
+def load_episodes(name):
+    pass
 
-
-for name in ['maze2d-umaze-v1', 'maze2d-medium-v1', 'maze2d-large-v1']:
+def register_gym_offline_env(name):
     register_offline_env(
-        'd4rl', name,
+        'gym', name,
         create_env_fn=functools.partial(load_environment, name),
-        load_episodes_fn=functools.partial(load_episodes_maze2d, name),
+        load_episodes_fn=functools.partial(load_episodes, name),
     )
-
-

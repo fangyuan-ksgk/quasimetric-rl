@@ -2,7 +2,7 @@
 
 # Test runner for my incremental hacker code
 args=(
-    env.kind=d4rl
+    env.kind=minigrid
     num_workers=4
     # encoder
     agent.quasimetric_critic.model.encoder.arch="[1024,1024,1024]"
@@ -24,4 +24,4 @@ args=(
 )
 
 # exec python -m offline.little_main "${args[@]}" "${@}"
-exec python -m offline.little_main "${args[@]}" env.name='maze2d-umaze-v1'
+exec python -m offline.little_main "${args[@]}" env.name='onewaydoor'
