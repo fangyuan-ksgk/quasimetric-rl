@@ -1,5 +1,13 @@
+import minigrid
 import gymnasium as gym
-env = gym.make('MountainCar-v0', render_mode='human')
+import mediapy
+
+# Using the minigrid environment to test the quasi-metric (needs some asymmetry in the environment)
+# -- a small twist makes the task interesting
+
+name = "MiniGrid-FourRooms-v0"
+env = gym.make(name, render_mode="rgb_array")
+
 obs, info = env.reset()
 
 while True:
