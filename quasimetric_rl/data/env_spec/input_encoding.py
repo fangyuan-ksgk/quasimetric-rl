@@ -50,45 +50,30 @@ class OneHot(InputEncoding):
 
 
 class AtariTorso(InputEncoding):
-    r'''
-    https://github.com/deepmind/acme/blob/3cf8495da73fb64cc09f272b7d99e52da4a3f082/acme/tf/networks/atari.py
-
-    class AtariTorso(base.Module):
-        """Simple convolutional stack commonly used for Atari."""
-
-        def __init__(self):
-            super().__init__(name='atari_torso')
-            self._network = snt.Sequential([
-                snt.Conv2D(32, [8, 8], [4, 4]),
-                tf.nn.relu,
-                snt.Conv2D(64, [4, 4], [2, 2]),
-                tf.nn.relu,
-                snt.Conv2D(64, [3, 3], [1, 1]),
-                tf.nn.relu,
-                snt.Flatten(),
-            ])
-
-        def __call__(self, inputs: Images) -> tf.Tensor:
-            return self._network(inputs)
-    '''
 
     torso: Callable[[torch.Tensor], torch.Tensor]
 
     def __init__(self, input_shape: torch.Size, activate_last: bool = True) -> None:
-        assert tuple(input_shape) in [(64, 64, 3), (64, 64, 4)]
-        super().__init__(input_shape, 1024)
+
+        assert tuple(input_shape) in [(7, 7, 3)]
+        super().__init__(input_shape, 512)
+        # Now help me calculate the output shape of the torso, input shape is (3, 7, 7)
+        # layer 1: (3, 7, 7) -> (32, 3, 3)
+        # layer 2: (32, 3, 3) -> (64, 1, 1)
+        # layer 3: (64, 1, 1) -> (64, 1, 1)
         self.torso = nn.Sequential(
-            nn.Conv2d(self.input_shape[-1], 32, (8, 8), (4, 4)),
+            nn.Conv2d(self.input_shape[-1], 16, (2, 2)),
             nn.ReLU(),
-            nn.Conv2d(32, 64, (4, 4), (2, 2)),
+            nn.Conv2d(16, 32, (2, 2)),
             nn.ReLU(),
-            nn.Conv2d(64, 64, (3, 3), (1, 1)),
-            nn.ReLU() if activate_last else nn.Identity(),
+            nn.Conv2d(32, 64, (2, 2)),
+            nn.ReLU(),
             nn.Flatten(),
         )
 
     def permute(self, s: torch.Tensor) -> torch.Tensor:
         assert s.dtype == torch.uint8
+        # normalize to [-0.5, 0.5], permute to (N, C, H, W)
         return s.div(255).permute(list(range(s.ndim - 3)) + [-1, -3, -2]) - 0.5
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:

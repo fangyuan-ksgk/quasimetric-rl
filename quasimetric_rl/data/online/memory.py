@@ -7,8 +7,8 @@ import logging
 import numpy as np
 import torch
 import torch.utils.data
-import gym
-import gym.spaces
+import gymnasium as gym
+import gymnasium.spaces
 
 from quasimetric_rl.data.env_spec import EnvSpec
 
@@ -162,8 +162,6 @@ class ReplayBuffer(Dataset):
         self.init_num_transitions = init_num_transitions
         self.increment_num_transitions = increment_num_transitions
         self.env = self.create_env()
-        print('---- Initializaing ReplayBuffer ----')
-        print('----- Environment created: ', self.env)
         super().__init__(
             kind, name, future_observation_discount=future_observation_discount,
             dummy=dummy)

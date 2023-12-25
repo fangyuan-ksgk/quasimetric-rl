@@ -6,7 +6,7 @@ import attrs
 import numpy as np
 import torch
 import torch.utils.data
-import gym
+import gymnasium as gym
 
 from omegaconf import MISSING
 
@@ -236,7 +236,7 @@ class Dataset:
         self.future_observation_discount = future_observation_discount
 
         self.env_spec = EnvSpec.from_env(self.create_env())
-        print('EnvSpec Created with ObservationShape: ', self.env_spec.observation_shape)
+        print('---239--- EnvSpec Created with ObservationShape: ', self.env_spec.observation_shape)
 
         assert 0 <= future_observation_discount
         self.future_observation_discount = future_observation_discount
