@@ -53,11 +53,11 @@ def train(dict_cfg: DictConfig):
     cfg: Conf = Conf.from_DictConfig(dict_cfg)
     # All the configurations are set here -- fromDictConfig clearly passes env.kind/name onto cfg such that
     # -- values of cfg.env.kind/name are set ... obviously ...
-    print('Checking on the Conf Object')
-    print('--- Type: ', type(cfg))
-    print('--- Attributes env.kind', cfg.env.kind)
-    print('--- Attributes env.name', cfg.env.name)
-    print('--- Attributes type(env)', type(cfg.env))
+    # print('Checking on the Conf Object')
+    # print('--- Type: ', type(cfg))
+    # print('--- Attributes env.kind', cfg.env.kind)
+    # print('--- Attributes env.name', cfg.env.name)
+    # print('--- Attributes type(env)', type(cfg.env))
 
 
     # writer = cfg.setup_for_experiment()  # checking & setup logging
