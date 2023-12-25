@@ -204,7 +204,7 @@ class ReplayBuffer(Dataset):
 
         logging.info(f'ReplayBuffer: Expanded from capacity={original_capacity} to {new_capacity} episodes')
 
-    def collect_rollout(self, actor: Callable[[torch.Tensor, torch.Tensor, gym.Space], np.ndarray], *,
+    def collect_rollout(self, actor: Callable[[torch.Tensor, torch.Tensor, minigrid_env.Space], np.ndarray], *,
                         env: Optional[FixedLengthEnvWrapper] = None) -> EpisodeData:
         if env is None:
             env = self.env
@@ -217,7 +217,7 @@ class ReplayBuffer(Dataset):
             f"{self.__class__.__name__} collect_rollout only supports Dict "
             f"observation space with keys {obs_dict_keys}, but got {env.observation_space}"
         )
-        assert isinstance(env.observation_space, gym.spaces.Dict), WRONG_OBS_ERR_MESSAGE
+        assert isinstance(env.observation_space, minigrid_env.spaces.Dict), WRONG_OBS_ERR_MESSAGE
         assert set(env.observation_space.spaces.keys()) == {'observation', 'achieved_goal', 'desired_goal'}, WRONG_OBS_ERR_MESSAGE
 
         observation_dict = env.reset()
@@ -316,4 +316,5 @@ class ReplayBuffer(Dataset):
         return '\n'.join(lines)
 
 
-from . import gcrl  # register
+# from . import gcrl  # Quit register gcrl outdated environment
+from . import minigrid_env  # register
