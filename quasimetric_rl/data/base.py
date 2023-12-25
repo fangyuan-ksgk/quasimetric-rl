@@ -236,6 +236,7 @@ class Dataset:
         self.future_observation_discount = future_observation_discount
 
         self.env_spec = EnvSpec.from_env(self.create_env())
+        print('EnvSpec Created with ObservationShape: ', self.env_spec.observation_shape)
 
         assert 0 <= future_observation_discount
         self.future_observation_discount = future_observation_discount

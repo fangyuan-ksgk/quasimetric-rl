@@ -162,6 +162,8 @@ class ReplayBuffer(Dataset):
         self.init_num_transitions = init_num_transitions
         self.increment_num_transitions = increment_num_transitions
         self.env = self.create_env()
+        print('---- Initializaing ReplayBuffer ----')
+        print('----- Environment created: ', self.env)
         super().__init__(
             kind, name, future_observation_discount=future_observation_discount,
             dummy=dummy)

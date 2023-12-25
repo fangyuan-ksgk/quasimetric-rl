@@ -7,8 +7,8 @@ Entry points for
 
 import attrs
 
-import gym
-import gym.spaces
+import gymnasium as gym
+import gymnasium.spaces
 import torch
 
 from . import input_encoding
@@ -24,7 +24,7 @@ class EnvSpec:
     @classmethod
     def from_env(self, env: gym.Env) -> 'EnvSpec':
         print('----Converting Env to EnvSpec ---- Original Env: ', env)
-        print('----Converting Env to EnvSpec ---- Original Env.observation_space: ', env.observation_space)
+        print('----Converting Env to EnvSpec ---- ObservationSpace Type: ', type(env.observation_space), ' Same as gym.spaces.Dict? ', type(env.observation_space) == gym.spaces.Dict)
         ospace = env.observation_space
         observation_space_is_dict = False
         if isinstance(ospace, gym.spaces.Dict):
