@@ -87,7 +87,7 @@ def register_online_env(kind: str, spec: str, *,
         kind, spec,
         load_episodes_fn=load_episodes_fn,
         create_env_fn=lambda: FixedLengthEnvWrapper(create_env_fn(), episode_length))
-
+    print('Env registered: ', kind, spec)
 
 class ReplayBuffer(Dataset):
     @attrs.define(kw_only=True)

@@ -23,6 +23,8 @@ class EnvSpec:
 
     @classmethod
     def from_env(self, env: gym.Env) -> 'EnvSpec':
+        print('----Converting Env to EnvSpec ---- Original Env: ', env)
+        print('----Converting Env to EnvSpec ---- Original Env.observation_space: ', env.observation_space)
         ospace = env.observation_space
         observation_space_is_dict = False
         if isinstance(ospace, gym.spaces.Dict):
