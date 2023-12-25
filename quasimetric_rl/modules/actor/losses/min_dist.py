@@ -55,6 +55,9 @@ class MinDistLoss(ActorLossBase):
                  add_goal_as_future_state: bool):
         super().__init__()
         if not env_spec.action_dtype.is_floating_point:
+            # For a discrete action space, turn of actor optimization will break the entire algorithm...
+            # did not realize this is a problem with the algorithm ...
+            
             raise RuntimeError(
                 'Discrete action spaces do not support optimizing actor by backpropagation through the critic. '
                 'Set agent.actor=null to turn of actor optimization.'

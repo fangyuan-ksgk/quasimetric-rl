@@ -60,8 +60,18 @@ def train(dict_cfg: DictConfig):
     # print('--- Attributes type(env)', type(cfg.env))
 
 
-    # writer = cfg.setup_for_experiment()  # checking & setup logging
+    writer = cfg.setup_for_experiment()  # checking & setup logging
     replay_buffer = cfg.env.make()
+
+    print('Agent Configuration: ', cfg.agent)
+
+    trainer = Trainer(
+        agent_conf=cfg.agent,
+        device=cfg.device.make(),
+        replay=replay_buffer,
+        batch_size=cfg.batch_size,
+        interaction_conf=cfg.interaction,
+    )
 
 if __name__ == '__main__':
     if 'MUJOCO_GL' not in os.environ:
