@@ -118,6 +118,8 @@ class EpisodeData(MultiEpisodeData):
         super().__attrs_post_init__()
         assert self.num_episodes == 1
 
+    # This allows one to initialize a 'EpisodeData' object by 'EpisodeData.from_simple_trajectory(.....)', which essentially
+    # - convert a single trajectory into a EpisodeData object
     @classmethod
     def from_simple_trajectory(cls,
                                observations: Union[np.ndarray, torch.Tensor],
@@ -128,7 +130,7 @@ class EpisodeData(MultiEpisodeData):
                                timeouts: Union[np.ndarray, torch.Tensor]):
         observations = torch.tensor(observations)
         next_observations=torch.tensor(next_observations)
-        all_observations = torch.cat([observations, next_observations[-1:]], dim=0)
+        all_observations = torch.cat([observations, next_observations[-1:]], dim=0) # add last observation over each episode
         return cls(
             episode_length=torch.tensor([observations.shape[0]]),
             all_observations=all_observations,
