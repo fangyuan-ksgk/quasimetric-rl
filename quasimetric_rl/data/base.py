@@ -56,6 +56,8 @@ class BatchData(TensorCollectionAttrsMixin):  # TensorCollectionAttrsMixin has s
 class MultiEpisodeData(TensorCollectionAttrsMixin):
     r"""
     The DATASET of MULTIPLE episodes
+
+    Built upon TensorCollectionAttrsMixin defined in util file, which supports Map & Tensor and concatenation of them
     """
 
 
@@ -72,22 +74,28 @@ class MultiEpisodeData(TensorCollectionAttrsMixin):
     # cat all timeouts from all episodes. Each episode has L timeouts.
     timeouts: torch.Tensor
     # cat all observation infos from all episodes. Each episode has L + 1 elements.
-    observation_infos: Mapping[str, torch.Tensor] = attrs.Factory(dict)
+    observation_infos: Mapping[str, torch.Tensor] = attrs.Factory(dict) # Setting Default value of a Map object as a Dictionary
     # cat all transition infos from all episodes. Each episode has L elements.
     transition_infos: Mapping[str, torch.Tensor] = attrs.Factory(dict)
 
     @property
+    # Episode_lengths has shape [L], the length of each episode,
     def num_episodes(self) -> int:
         return self.episode_lengths.shape[0]
 
     @property
+    # Question: What is the shape of self.rewards?
+    # Answer: [L*N]
     def num_transitions(self) -> int:
         return self.rewards.shape[0]
 
     def __attrs_post_init__(self):
+        # Question: 
         assert self.episode_lengths.ndim == 1
         N = self.num_transitions
         assert N > 0
+        # Question: This asserting looks wrong: adding number of transitions with number of episodes is ridiculous...
+        # 
         assert self.all_observations.ndim >= 1 and self.all_observations.shape[0] == (N + self.num_episodes), self.all_observations.shape
         assert self.actions.ndim >= 1 and self.actions.shape[0] == N
         assert self.rewards.ndim == 1 and self.rewards.shape[0] == N
@@ -176,6 +184,8 @@ def register_offline_env(kind: str, spec: str, *, load_episodes_fn, create_env_f
 # .make() function converts name_config into an environment, wrapped in a Dataset object
 # --- recall that the quasi-RL requires ability to sample from initial/goal states, which is why such wrapper might be needed
 # we need to switch to some other environment compatible with M1 chips here
+    
+# Question: It seems that we have default values on episode_length and num_episodes, where are they set?
 class Dataset:
     @attrs.define(kw_only=True)
     class Conf:
@@ -225,6 +235,9 @@ class Dataset:
         return CREATE_ENV_REGISTRY[self.kind, self.name]()
 
     def load_episodes(self) -> Iterator[EpisodeData]:
+        # episode is also registered in a global variable LOAD_EPISODES_REGISTRY
+        # where is the LOAD_EPISODES_REGISTRY declared to be a global variable?
+        # -- seems like it is declared in the base.py file
         return LOAD_EPISODES_REGISTRY[self.kind, self.name]()
 
     def __init__(self, kind: str, name: str, *,

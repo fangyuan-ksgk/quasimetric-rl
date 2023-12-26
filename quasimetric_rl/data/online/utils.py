@@ -55,6 +55,12 @@ def get_empty_episode(env_spec: EnvSpec, episode_length: int) -> EpisodeData:
 
 
 def get_empty_episodes(env_spec: EnvSpec, episode_length: int, num_episodes: int) -> MultiEpisodeData:
+    # Question: Why do we need to add num_episodes to the first dimension of all_observations?
+    # Answer: Because we are going to flatten the first dimension of all_observations later on.
+    # Question: Why is the flatten step requires an extra episode?
+    # Answer: Because we are going to use the last episode as the first episode of the next batch.
+    # Question: What? Next Batch? Why is it needed? And why is the current batch then not subtracted by 1 episode, since it is already represented in the previous batch?
+    # Answer: Because we are going to use the last episode as the first episode of the next batch.
     all_observations = torch.empty(episode_length * num_episodes + num_episodes, *env_spec.observation_shape, dtype=env_spec.observation_dtype)
     timeouts = torch.zeros(num_episodes, episode_length, dtype=torch.bool)
     timeouts[:, -1] = True
@@ -65,6 +71,8 @@ def get_empty_episodes(env_spec: EnvSpec, episode_length: int, num_episodes: int
         )
     else:
         observation_infos = {}
+    # Question: Is it true that by definition, MultiEpisodeData requires an extra episode in the 'all_observation' tensor?
+    # Answer: Yes, it is true. See the definition of MultiEpisodeData.
     return MultiEpisodeData(
         episode_lengths=torch.full([num_episodes], episode_length, dtype=torch.int64),
         all_observations=all_observations,

@@ -63,15 +63,30 @@ def train(dict_cfg: DictConfig):
     writer = cfg.setup_for_experiment()  # checking & setup logging
     replay_buffer = cfg.env.make()
 
-    print('Agent Configuration: ', cfg.agent)
+    print('--- Attribute Shape Checker ---')
+    print('--- replay_buffer.episode_length: ', replay_buffer.episode_length)
+    print('--- replay_buffer.num_episodes_realized: ', replay_buffer.num_episodes_realized)
+    print('--- replay_buffer.episode_capacity(): ', replay_buffer.episodes_capacity)
+    print('--- replay_buffer.raw_data type: ', type(replay_buffer.raw_data))
+    print('--- replay_buffer.raw_data.episode_lengths shape: ', replay_buffer.raw_data.episode_lengths.shape)
+    print('--- replay_buffer.raw_data.episode_lengths[:5]: ', replay_buffer.raw_data.episode_lengths[:5])
 
-    trainer = Trainer(
-        agent_conf=cfg.agent,
-        device=cfg.device.make(),
-        replay=replay_buffer,
-        batch_size=cfg.batch_size,
-        interaction_conf=cfg.interaction,
-    )
+    print('--- replay_buffer.raw_data.all_observation shape: ', replay_buffer.raw_data.all_observations.shape)
+    print('--- replay_buffer.raw_data.actions shape: ', replay_buffer.raw_data.actions.shape)
+    print('--- replay_buffer.raw_data.rewards shape: ', replay_buffer.raw_data.rewards.shape)
+    print('--- replay_buffer.raw_data.terminals shape: ', replay_buffer.raw_data.terminals.shape)
+    print('--- replay_buffer.raw_data.timeouts shape: ', replay_buffer.raw_data.timeouts.shape)
+    print('--- replay_buffer.raw_data.observation_infos keys: ', replay_buffer.raw_data.observation_infos.keys())
+
+    # print('Agent Configuration: ', cfg.agent)
+
+    # trainer = Trainer(
+    #     agent_conf=cfg.agent,
+    #     device=cfg.device.make(),
+    #     replay=replay_buffer,
+    #     batch_size=cfg.batch_size,
+    #     interaction_conf=cfg.interaction,
+    # )
 
 if __name__ == '__main__':
     if 'MUJOCO_GL' not in os.environ:

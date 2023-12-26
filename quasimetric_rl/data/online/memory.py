@@ -147,6 +147,8 @@ class ReplayBuffer(Dataset):
     def load_episodes(self) -> Iterator[EpisodeData]:
         r'''
         Used to initialize `ReplayBuffer`
+        For the Replay Buffer, the Registered Offline Data is not used, and load_episodes function is not used
+        ---- In another word, the loaded episodes are always empty (original load_episodes function in Dataset is overwritten)
         '''
         init_num_episodes = int(np.ceil(self.init_num_transitions / self.episode_length))
         for _ in range(init_num_episodes):
@@ -167,7 +169,7 @@ class ReplayBuffer(Dataset):
             dummy=dummy)
         self.num_episodes_realized = 0
         if load_offline_data and not dummy:  # load data if required.
-            for episode in super().load_episodes():
+            for episode in super().load_episodes(): # This uses original load_episode function in Dataset / load registered Episode Data
                 self.add_rollout(episode)
                 self.num_episodes_realized += 1
         self.num_successful_episodes = self.raw_data.transition_infos['is_success'].unflatten(
@@ -175,7 +177,7 @@ class ReplayBuffer(Dataset):
         )[:self.num_episodes_realized].any(-1).sum(dtype=torch.int64).item()
         self.num_successful_transitions = self.raw_data.transition_infos['is_success'].unflatten(
             0, [self.episodes_capacity, self.episode_length],
-        )[:self.num_episodes_realized].sum(dtype=torch.int64).item()
+        )[:self.num_episodes_realized].sum(dtype=torch.int64).item() # 'successful transitions' is a funny word, it counts the number of transitions that results in 'done=True' (in my designed env, once done=True, everything stops, so it would be the same as the success episodes in its values, unless the episode restart for several times until the episode length is reached, in which case there can be multiple 'successful transitions')
 
     def _expand(self):
         original_capacity: int = self.episodes_capacity
@@ -184,6 +186,8 @@ class ReplayBuffer(Dataset):
         #   # Data
         #   raw_data: MultiEpisodeData  # only episodes in split
         #   # Auxiliary structures that helps fetching transitions of specific kinds
+        # Question: Where is the self.increment_num_episodes defined?
+        # Answer: self.increment_num_episodes is defined in the Conf class, which is a subclass of Dataset.Conf
         self.raw_data = MultiEpisodeData.cat(
             [self.raw_data, get_empty_episodes(self.env_spec, self.episode_length, self.increment_num_episodes)],
             dim=0,
@@ -259,6 +263,8 @@ class ReplayBuffer(Dataset):
         return epi
 
     def add_rollout(self, episode: EpisodeData):
+        # looks like this function basically expands dataset from [self.num_episodes_realized, *] to [self.num_episodes_realized+1, *]
+        # and then replace the dummny data in the new episode with the real data in the episode
         if self.num_episodes_realized == self.episodes_capacity:
             self._expand()
 
