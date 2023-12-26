@@ -282,6 +282,7 @@ class Dataset:
     def get_observations(self, obs_indices: torch.Tensor):
         return self.raw_data.all_observations[obs_indices]
 
+    # Here indexing on Dataset class is defined and will return a BatchData object
     def __getitem__(self, indices: torch.Tensor) -> BatchData:
         indices = torch.as_tensor(indices)
         eindices = self.indices_to_episode_indices[indices]
@@ -289,10 +290,11 @@ class Dataset:
         obs = self.get_observations(obs_indices)
         nobs = self.get_observations(obs_indices + 1)
 
-        terminals = self.raw_data.terminals[indices]
-
         tindices = self.indices_to_episode_timesteps[indices]
         epilengths = self.raw_data.episode_lengths[eindices]  # max idx is this
+        # Summary on FutureObservations
+        # --- Sample a future observation (>current timestep but <episode length) according to discounted probability
+        # --- Used to train RL model to predict on the future observation (world model stuff)
         deltas = torch.arange(self.max_episode_length)
         pdeltas = torch.where(
             # test tidx + 1 + delta <= max_idx = epi_length
@@ -305,13 +307,14 @@ class Dataset:
         ).sample()
         future_observations = self.get_observations(obs_indices + 1 + deltas)
 
+        # Future observation not the same as next_observations
         return BatchData(
             observations=obs,
             actions=self.raw_data.actions[indices],
             next_observations=nobs,
             future_observations=future_observations,
             rewards=self.raw_data.rewards[indices],
-            terminals=terminals,
+            terminals=self.raw_data.terminals[indices],
             timeouts=self.raw_data.timeouts[indices],
         )
 

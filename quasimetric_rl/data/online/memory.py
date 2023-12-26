@@ -311,7 +311,7 @@ class ReplayBuffer(Dataset):
 
         self.num_episodes_realized += 1
 
-    def sample(self, batch_size: int) -> BatchData:
+    def sample(self, batch_size: int) -> BatchData: # self[indices] returns BatchData object? why?
         indices = torch.as_tensor(
             np.random.choice(self.num_transitions_realized, size=[batch_size])
         )
