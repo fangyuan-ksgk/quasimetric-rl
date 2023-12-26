@@ -82,17 +82,20 @@ def train(dict_cfg: DictConfig):
     print('---- Testing _Expand function on Replay Buffer ----')
     replay_buffer._expand()
 
+    # Environment's Desired Goal & Target Goal seems to be undefined yet
+
+
 
 
     # print('Agent Configuration: ', cfg.agent)
 
-    # trainer = Trainer(
-    #     agent_conf=cfg.agent,
-    #     device=cfg.device.make(),
-    #     replay=replay_buffer,
-    #     batch_size=cfg.batch_size,
-    #     interaction_conf=cfg.interaction,
-    # )
+    trainer = Trainer(
+        agent_conf=cfg.agent,
+        device=cfg.device.make(),
+        replay=replay_buffer,
+        batch_size=cfg.batch_size,
+        interaction_conf=cfg.interaction,
+    )
 
 if __name__ == '__main__':
     if 'MUJOCO_GL' not in os.environ:

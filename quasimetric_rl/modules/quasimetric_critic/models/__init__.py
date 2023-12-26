@@ -13,7 +13,7 @@ from ...utils import Module
 
 from ....data import EnvSpec
 
-
+# This is a Great Breaking point into the codebase
 class QuasimetricCritic(Module):
     @attrs.define(kw_only=True)
     class Conf:
