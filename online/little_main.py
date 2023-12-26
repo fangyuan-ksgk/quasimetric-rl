@@ -78,6 +78,12 @@ def train(dict_cfg: DictConfig):
     print('--- replay_buffer.raw_data.timeouts shape: ', replay_buffer.raw_data.timeouts.shape)
     print('--- replay_buffer.raw_data.observation_infos keys: ', replay_buffer.raw_data.observation_infos.keys())
 
+    # Test with _Expand function on Replay Buffer
+    print('---- Testing _Expand function on Replay Buffer ----')
+    replay_buffer._expand()
+
+
+
     # print('Agent Configuration: ', cfg.agent)
 
     # trainer = Trainer(

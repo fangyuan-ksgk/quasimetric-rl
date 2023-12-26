@@ -90,6 +90,9 @@ def register_online_env(kind: str, spec: str, *,
     print('Env registered: ', kind, spec)
 
 class ReplayBuffer(Dataset):
+    # Simple Questions
+    # 1. What it the total number of transitions stored in the ReplayBuffer?
+    # 2. What is the total number of episodes stored in the ReplayBuffer?
     @attrs.define(kw_only=True)
     class Conf(Dataset.Conf):
         r"""
@@ -106,6 +109,7 @@ class ReplayBuffer(Dataset):
         # Below are options for growing the tensors. Only tune they if you think
         # that speed / memory is affected by the current settings. They *DO NOT*
         # affect behavior. See above note.
+        # Default init_num_transitions = episode_length * num_episodes = 1e6
         init_num_transitions: int = attrs.field(default=int(1e6), validator=attrs.validators.gt(0))
         increment_num_transitions: int = attrs.field(default=int(0.5e6), validator=attrs.validators.gt(0))
 
@@ -129,7 +133,7 @@ class ReplayBuffer(Dataset):
 
     @property
     def episode_length(self) -> int:
-        return self.env.episode_length
+        return self.env.episode_length # Episodal length of ReplayBuffer is directly inherited from the Env created
 
     @property
     def num_transitions_realized(self) -> int:
@@ -181,22 +185,24 @@ class ReplayBuffer(Dataset):
 
     def _expand(self):
         original_capacity: int = self.episodes_capacity
-
         # Update
         #   # Data
         #   raw_data: MultiEpisodeData  # only episodes in split
         #   # Auxiliary structures that helps fetching transitions of specific kinds
         # Question: Where is the self.increment_num_episodes defined?
         # Answer: self.increment_num_episodes is defined in the Conf class, which is a subclass of Dataset.Conf
+        self.increment_num_episodes = 1
         self.raw_data = MultiEpisodeData.cat(
             [self.raw_data, get_empty_episodes(self.env_spec, self.episode_length, self.increment_num_episodes)],
             dim=0,
         )
+        # Check the property class self.episodes_capacity's definition -- it is the num_episode of the self.raw_data class
         new_capacity = self.episodes_capacity
 
         #   # Stats
         #   indices_to_episode_indices: torch.Tensor  # episode indices refers to indices in this split
         #   indices_to_episode_timesteps: torch.Tensor
+        # These are all flattened indices, one for episode-index, one for timestep-index
         self.indices_to_episode_indices = torch.cat([
             self.indices_to_episode_indices,
             torch.repeat_interleave(torch.arange(original_capacity, new_capacity), self.episode_length),
@@ -261,13 +267,14 @@ class ReplayBuffer(Dataset):
             timeout = info.get('TimeLimit.truncated', False)
             assert (timeout or terminal) == (t == self.episode_length)
         return epi
-
+    
     def add_rollout(self, episode: EpisodeData):
         # looks like this function basically expands dataset from [self.num_episodes_realized, *] to [self.num_episodes_realized+1, *]
         # and then replace the dummny data in the new episode with the real data in the episode
         if self.num_episodes_realized == self.episodes_capacity:
             self._expand()
-
+        # 0 is the dimension to unflatten, we basically reshape the first dimension into [self.episodes_capacity, self.episode_length+1]-shaped tensor.
+        # the new episode's observation is added to the next index of the last_realized_episode
         self.raw_data.all_observations.unflatten(
             0, [self.episodes_capacity, self.episode_length + 1],
         )[self.num_episodes_realized] = episode.all_observations

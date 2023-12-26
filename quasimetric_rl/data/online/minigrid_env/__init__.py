@@ -70,6 +70,7 @@ valid_names = (
 )
 
 for name in valid_names:
+    # Default episode_length is 50
     register_online_env('minigrid_env', name, 
                          create_env_fn=functools.partial(create_env_from_spec, name=name),
-                         episode_length=50)
+                         episode_length=500)
