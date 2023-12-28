@@ -10,7 +10,10 @@ from ...utils import MLP, LatentTensor
 from ....data import EnvSpec
 from ....data.env_spec.input_encoding import InputEncoding
 
-
+# More than 3 questions needs to be asked here:
+# 1. What is the purpose of the attrs.define decorator?
+# 2. What is the purpose of the Conf class?
+# 3. What is the purpose of the __call__ method?
 class Encoder(nn.Module):
     r"""
     (*, *input_shape)                      Input
@@ -46,6 +49,7 @@ class Encoder(nn.Module):
     def __init__(self, *, env_spec: EnvSpec,
                  arch: Tuple[int, ...], latent_size: int, **kwargs):
         super().__init__(**kwargs)
+        # Encoder relies on MLP and InputEncoding
         self.input_shape = env_spec.observation_shape
         self.input_encoding = env_spec.make_observation_input()
         encoder_input_size = self.input_encoding.output_size
@@ -55,7 +59,7 @@ class Encoder(nn.Module):
     def forward(self, x: torch.Tensor) -> LatentTensor:
         return self.encoder(self.input_encoding(x))
 
-    # for type hint
+    # for type hint (we test on this!)
     def __call__(self, x: torch.Tensor) -> LatentTensor:
         return super().__call__(x)
 

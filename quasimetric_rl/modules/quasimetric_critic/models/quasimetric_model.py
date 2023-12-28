@@ -69,6 +69,8 @@ class QuasimetricModel(nn.Module):
         projector_arch: Tuple[int, ...] = (512,)
         quasimetric_head_spec: str = 'iqe(dim=2048,components=64)'
 
+        # * accomodate extra arguments for make function input, as long as input_size is provided
+        # I did not see the nessesity of this yet ...
         def make(self, *, input_size: int) -> 'QuasimetricModel':
             return QuasimetricModel(
                 input_size=input_size,

@@ -49,6 +49,11 @@ class BaseConf(abc.ABC):
         mode=hydra.types.RunMode.RUN,  # sigh: https://github.com/facebookresearch/hydra/issues/2262
     )
 
+    # sub command and check output
+    # -- r'' is a raw string literal (so that \n is not interpreted as a newline)
+    # -- r'...' is the command line (.split() is the special requiremnet for the subprocess.check_output() function
+    # -- cwd: specify the directory where the command is executed (cwd is short for current working directory)
+    # -- split() & strip() are required
     base_git_dir: str = subprocess.check_output(
         r'git rev-parse --show-toplevel'.split(),
         cwd=os.path.dirname(__file__), encoding='utf-8').strip()

@@ -47,10 +47,13 @@ cs.store(name='config', node=Conf())
 
 @pdb_if_DEBUG
 @hydra.main(version_base=None, config_name="config")
-def train(dict_cfg: DictConfig):
+def train(dict_cfg1: DictConfig):
+    print('Checking the teleported dict_config')
+    print(dict_cfg1)
+
     # Even though from_dictconfig pass all the configs input into the Conf object, it is still strange
     # -- how the config pass into the env.Conf object?
-    cfg: Conf = Conf.from_DictConfig(dict_cfg)
+    cfg: Conf = Conf.from_DictConfig(dict_cfg1)
     # All the configurations are set here -- fromDictConfig clearly passes env.kind/name onto cfg such that
     # -- values of cfg.env.kind/name are set ... obviously ...
     # print('Checking on the Conf Object')
@@ -85,17 +88,23 @@ def train(dict_cfg: DictConfig):
     # Environment's Desired Goal & Target Goal seems to be undefined yet
 
 
-
+    print('Test on Quasimetricmodel -- Encoder')
+    # Test on Quasimetricmodel -- Encoder
+    # cfg.agent.encoder
 
     # print('Agent Configuration: ', cfg.agent)
 
-    trainer = Trainer(
-        agent_conf=cfg.agent,
-        device=cfg.device.make(),
-        replay=replay_buffer,
-        batch_size=cfg.batch_size,
-        interaction_conf=cfg.interaction,
-    )
+    # Not there yet, need to break into the trainer
+    # trainer = Trainer(
+    #     agent_conf=cfg.agent,
+    #     device=cfg.device.make(),
+    #     replay=replay_buffer,
+    #     batch_size=cfg.batch_size,
+    #     interaction_conf=cfg.interaction,
+    # )
+
+    # 
+
 
 if __name__ == '__main__':
     if 'MUJOCO_GL' not in os.environ:
@@ -104,4 +113,7 @@ if __name__ == '__main__':
     # set up some hydra flags before parsing
     os.environ['HYDRA_FULL_ERROR'] = str(int(FLAGS.DEBUG))
 
+    # check the mysterious dict_config
+    # print('Checking the teleported dict_config')
+    # print(dict_config)
     train()

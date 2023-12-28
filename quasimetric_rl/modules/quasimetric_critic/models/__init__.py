@@ -18,12 +18,20 @@ class QuasimetricCritic(Module):
     @attrs.define(kw_only=True)
     class Conf:
         # config / argparse uses this to specify behavior
-
+        # Inside the Conf class, everything is actually a Conf object
+        # -- e.g. encoder is actually the conf object of the Encoder class
+        # Encoder.Conf tells us that the encoder's Type || Encoder.Conf() initialize a instance of the Type, giving a default value for it.
         encoder: Encoder.Conf = Encoder.Conf()
         quasimetric_model: QuasimetricModel.Conf = QuasimetricModel.Conf()
         latent_dynamics: LatentDynamics.Conf = LatentDynamics.Conf()
 
         def make(self, *, env_spec: EnvSpec) -> 'QuasimetricCritic':
+            # High-level Intuition
+            # Information of Rd latent space is parametrized in latent_size
+            # Information of observation, action in env is included in env_spec
+            # -- Encoder needs information on the env observation
+            # -- QuasimetricModel operates only on latent space
+            # -- LatentDynamics predict next latent state given current latent state and action
             encoder = self.encoder.make(
                 env_spec=env_spec,
             )
