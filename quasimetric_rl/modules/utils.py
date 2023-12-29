@@ -109,6 +109,7 @@ class MLP(nn.Module):
                 last_fc.bias.zero_()
 
         self.module = torch.jit.script(nn.Sequential(*modules))
+        print('Jit script success')
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
         return self.module(input)

@@ -11,7 +11,7 @@ from ....data import EnvSpec
 from ....data.env_spec.input_encoding import InputEncoding
 
 
-
+# LatentDynamics is a MLP that takes in a latent vector and an action vector
 class LatentDynamics(MLP):
     @attrs.define(kw_only=True)
     class Conf:
@@ -33,6 +33,25 @@ class LatentDynamics(MLP):
 
     def __init__(self, *, latent_size:int, env_spec: EnvSpec, hidden_sizes: Tuple[int, ...], residual: bool):
         action_input = env_spec.make_action_input()
+        print('----- Begining of LatentDynamics initialization -----')
+        inputs1 = latent_size + action_input.output_size
+        inputs2 = latent_size
+        inputs3 = hidden_sizes
+        inputs4 = residual
+        print('---- Check on initialization values for LatentDynamics ----')
+        print('action_input.output_size: ', action_input.output_size, ' | Type: '  , type(action_input.output_size))
+        
+
+        print('---- Issue Spotted: ----', 'action_input.output_size is a numpy.int64')
+        print('---- Converting type to int ----')
+        action_input.output_size = int(action_input.output_size)
+        print('latent_size + action_input.output_size: ', inputs1, ' | Type: '  , type(inputs1))
+        print('latent_size: ', inputs2, ' | Type: '  , type(inputs2))
+        print('hidden_sizes: ', inputs3, ' | Type: '  , type(inputs3))
+        print('residual: ', inputs4, ' | Type: '  , type(inputs4))
+
+        # print('-- Did not see any numpy.int64 here --')
+        print('-- Begin super().__init__ going into MLP initialization steps')
         super().__init__(
             latent_size + action_input.output_size,
             latent_size,
@@ -41,6 +60,7 @@ class LatentDynamics(MLP):
         )
         self.action_input = action_input
         self.residual = residual
+        print('---- line44. Sucess in initialization of LatentDynamics')
 
     def forward(self, zx: LatentTensor, action: torch.Tensor) -> LatentTensor:
         # broadcast batch shapes before cat

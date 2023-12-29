@@ -92,8 +92,27 @@ def train(dict_cfg: DictConfig):
     # Make an encoder with the encoder_cfg -- with env_spec
     print('Test on Encoder')
     encoder = encoder_cfg.make(env_spec=replay_buffer.env_spec)
-    print('Encoder make success: ')
+    print('----------- Encoder make success: ')
     print(encoder)
+
+    print('Test on QuasimetricModel')
+    quasimetric_model = quasimetric_cfg.make(input_size=encoder.latent_size)
+    print('----------- QuasimetricModel make success: ')
+    print(quasimetric_model)
+
+
+    # Issue with the LatentDynamics
+    print('Test on LatentDynamics')
+    
+
+    # torch.jit.script gives type-error, in_feature has type np.int64, needs to convert to int.
+    # --- why is this not bugging the original code? 
+    # --- -- because the original code is not using torch.jit.script
+    latent_dynamics = latent_dynamics_cfg.make(latent_size=encoder.latent_size, env_spec=replay_buffer.env_spec)
+    # print('LatentDynamics make success: ')
+    # print(latent_dynamics)
+
+
 
 
 
