@@ -50,6 +50,8 @@ cs.store(name='config', node=Conf())
 # -- OmegaConf.to_container()(which is implemented inside .from_DictConfig) converts DictConfig back to the original data type (node type)
 # -- Overall, the structure of Conf consists of Actor & Critic
 # -- Critic consists of '.model' & '.losses' (Model consists of Encoder, QuasimetricModel, LatentDynamics)
+# -- torch.jit.script requires 'int' type || minigrid env has 'np.int64' type env.space.n, which causes issue downstream (during initialization of InputEncoding->OnehotEncoding->LatentDynamics.__init__(...env_spec.make_action_intput()...))
+# -- LatentDynamics.__init__ inherits from MLP.__init__, which does torch.jit.script on the module, whose output_size must be 'int' type, however, the minigrid env's converted env_spec.action_space.n is 'np.int64' type, causing error (not in the original author's experiment, which uses standard env I suppose)
 @pdb_if_DEBUG
 @hydra.main(version_base=None, config_name="config") 
 def train(dict_cfg: DictConfig):

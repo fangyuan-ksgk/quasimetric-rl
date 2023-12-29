@@ -14,6 +14,7 @@ import torch
 from . import input_encoding
 from . import act_distn
 
+# Issue 1 Track: EnvSpec.action_space.n is a numpy.int64, causing error downstream | gym.Space.n is a numpy.int64 (?) | gymnasium different from gym, or version compatibility issue?
 
 @attrs.define(kw_only=True)
 class EnvSpec:
@@ -64,7 +65,7 @@ class EnvSpec:
     def make_action_input(self) -> input_encoding.InputEncoding:
         if isinstance(self.action_space, gym.spaces.Discrete):
             assert len(self.action_shape) == 0
-            return input_encoding.OneHot(input_shape=torch.Size([]), num_classes=self.action_space.n)
+            return input_encoding.OneHot(input_shape=torch.Size([]), num_classes=int(self.action_space.n))
         elif isinstance(self.action_space, gym.spaces.Box):
             return input_encoding.Identity(input_shape=self.action_shape)
         else:
