@@ -41,27 +41,20 @@ class Conf(BaseConf):
     save_steps: int = attrs.field(default=50000, validator=attrs.validators.gt(0))
 
 
-
+# -- Configuration is parsed from command-line arguments & Stored
 cs = hydra.core.config_store.ConfigStore.instance()
 cs.store(name='config', node=Conf())
 
+# Learned:
+# -- @hydra.main decorator allows for 'train()' calling, which takes 'config' in the StoreConfig object
+# -- OmegaConf.to_container()(which is implemented inside .from_DictConfig) converts DictConfig back to the original data type (node type)
+# -- Overall, the structure of Conf consists of Actor & Critic
+# -- Critic consists of '.model' & '.losses' (Model consists of Encoder, QuasimetricModel, LatentDynamics)
 @pdb_if_DEBUG
-@hydra.main(version_base=None, config_name="config")
-def train(dict_cfg1: DictConfig):
-    print('Checking the teleported dict_config')
-    print(dict_cfg1)
+@hydra.main(version_base=None, config_name="config") 
+def train(dict_cfg: DictConfig):
 
-    # Even though from_dictconfig pass all the configs input into the Conf object, it is still strange
-    # -- how the config pass into the env.Conf object?
-    cfg: Conf = Conf.from_DictConfig(dict_cfg1)
-    # All the configurations are set here -- fromDictConfig clearly passes env.kind/name onto cfg such that
-    # -- values of cfg.env.kind/name are set ... obviously ...
-    # print('Checking on the Conf Object')
-    # print('--- Type: ', type(cfg))
-    # print('--- Attributes env.kind', cfg.env.kind)
-    # print('--- Attributes env.name', cfg.env.name)
-    # print('--- Attributes type(env)', type(cfg.env))
-
+    cfg: Conf = Conf.from_DictConfig(dict_cfg)
 
     writer = cfg.setup_for_experiment()  # checking & setup logging
     replay_buffer = cfg.env.make()
@@ -87,23 +80,22 @@ def train(dict_cfg1: DictConfig):
 
     # Environment's Desired Goal & Target Goal seems to be undefined yet
 
+    # BreakDown of the Conf class all the way to the Encoder
+    agent_cfg = cfg.agent # QRLConf
+    actor_cfg = agent_cfg.actor # ActorConf
+    quasimetric_critic_cfg = agent_cfg.quasimetric_critic # QuasimetricCriticConf
+    quasimetric_critic_model_cfg = quasimetric_critic_cfg.model # QuasimetricModelConf
+    encoder_cfg = quasimetric_critic_model_cfg.encoder # EncoderConf
+    latent_dynamics_cfg = quasimetric_critic_model_cfg.latent_dynamics # LatentDynamicsConf
+    quasimetric_cfg = quasimetric_critic_model_cfg.quasimetric_model # QuasimetricModelConf
 
-    print('Test on Quasimetricmodel -- Encoder')
-    # Test on Quasimetricmodel -- Encoder
-    # cfg.agent.encoder
+    # Make an encoder with the encoder_cfg -- with env_spec
+    print('Test on Encoder')
+    encoder = encoder_cfg.make(env_spec=replay_buffer.env_spec)
+    print('Encoder make success: ')
+    print(encoder)
 
-    # print('Agent Configuration: ', cfg.agent)
 
-    # Not there yet, need to break into the trainer
-    # trainer = Trainer(
-    #     agent_conf=cfg.agent,
-    #     device=cfg.device.make(),
-    #     replay=replay_buffer,
-    #     batch_size=cfg.batch_size,
-    #     interaction_conf=cfg.interaction,
-    # )
-
-    # 
 
 
 if __name__ == '__main__':
