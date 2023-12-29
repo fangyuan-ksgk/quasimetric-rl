@@ -33,7 +33,8 @@ class LatentDynamics(MLP):
 
     def __init__(self, *, latent_size:int, env_spec: EnvSpec, hidden_sizes: Tuple[int, ...], residual: bool):
         action_input = env_spec.make_action_input()
-
+        # --- Latentdynamics ---
+        # MLP with concatenated latent space encoded state & one-hot encoded action input and predict encoded next state
         super().__init__(
             latent_size + action_input.output_size,
             latent_size,

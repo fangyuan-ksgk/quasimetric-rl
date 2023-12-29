@@ -62,7 +62,7 @@ class LossBase(nn.Module, metaclass=abc.ABCMeta):
 #-----------------------------------------------------------------------------#
 #------------------------------------ MLP ------------------------------------#
 #-----------------------------------------------------------------------------#
-
+# A congigurable stack of linear layers with activation function || torch.jit.script || initialization method (glorot_uniform)
 
 class MLP(nn.Module):
     input_size: int

@@ -4,10 +4,14 @@ import attrs
 
 import torch
 import torch.nn as nn
-import torchqmet
+import torchqmet # This is the C++ library, implements the IQE model
 
 from ...utils import MLP, LatentTensor
 
+# -- Interval Quasimetric Embedding -- Computes each component-wise quasi-metric using interval measure formulation
+# -- output has shape [B, num_components] | IQE-sum/mean ensemble on those computed components
+# -- Note that there is a 'REDUNCTION=sum' argument, C++ function already implements the aggregation/reduction mechanism
+# -- Therefore the output is a scaler for sure. 
 
 class L2(torchqmet.QuasimetricBase):
     r"""
@@ -35,6 +39,9 @@ def create_quasimetric_head_from_spec(spec: str) -> torchqmet.QuasimetricBase:
     #   1. iqe(dim=xxx,components=xxx), Interval Quasimetric Embedding
     #   2. l2(dim=xxx), L2 distance
 
+    # Note that 'dim' is also the 'input_size'
+
+    # IQE divides inputs into k components, each of size l, compute the interval quasimetric embedding on each components, then  
     def iqe(*, dim: int, components: int) -> torchqmet.IQE:
         assert dim % components == 0, "IQE: dim must be divisible by components"
         return torchqmet.IQE(dim, dim // components)
@@ -45,7 +52,9 @@ def create_quasimetric_head_from_spec(spec: str) -> torchqmet.QuasimetricBase:
     return eval(spec, dict(iqe=iqe, l2=l2), {})
 
 
-
+# Question: it looks like the QModel's output is still NOT a scaler here, even for non-bidirectional case
+# --- it should be (B, num_components) for non-bidirectional case & (B, 2, num_components) for bidirectional case ?
+# --- so the comment below is wrong ? let's checks
 class QuasimetricModel(nn.Module):
     r"""
     (*, input_shape)    (*, input_shape)        Input latents
@@ -92,7 +101,7 @@ class QuasimetricModel(nn.Module):
         px = self.projector(zx)  # [B x D]
         py = self.projector(zy)  # [B x D]
 
-        if bidirectional:
+        if bidirectional: # bidirectional essentially adds d(y,x), and not just d(x,y)
             px, py = torch.broadcast_tensors(px, py)
             px, py = torch.stack([px, py], dim=-2), torch.stack([py, px], dim=-2)  # [B x 2 x D]
 
