@@ -32,7 +32,7 @@ from . import data, modules, utils
 
 @attrs.define(kw_only=True, auto_attribs=True)
 class DeviceConfig:
-    type: str = 'cuda'
+    type: str = 'mps'
     index: Optional[int] = 0
 
     def make(self):

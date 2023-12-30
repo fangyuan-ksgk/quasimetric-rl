@@ -130,7 +130,37 @@ def train(dict_cfg: DictConfig):
     print('Default --- Components number: ', quasimetric_model.quasimetric_head.num_components, '| reduction method: ', quasimetric_model.quasimetric_head.reduction, 
     '| transforms:', quasimetric_model.quasimetric_head.transforms, '| discount: ', quasimetric_model.quasimetric_head.discount)
 
-    # 
+    # Test on Encoder output shape w. environment
+    # Question: How to port environment into the encoder?
+    # --- how to run the online environment w. replay buffer?
+    # print('------------------------------')
+    # print('Test on Encoder output shape')
+    # batch_size = 4
+    # env = replay_buffer.env
+    # observation = env.reset()
+    # print('observation shape: ', observation.shape)
+    # observation = torch.from_numpy(observation).unsqueeze(0)
+    # print('observation shape: ', observation.shape)
+    # encoder_output = encoder(observation)
+    # print('Encoder output shape: ', encoder_output.shape)
+
+    print('Check for Apple GPU support')
+    print(torch.backends.mps.is_available())
+    print('------------------------------')
+
+
+    # To learn how to run online environment, look into the Trainer class
+    # -- bugs in the loss function calculation | likely another type issue with different environment?
+    trainer = Trainer(
+        agent_conf=cfg.agent,
+        device=cfg.device.make(),
+        replay=replay_buffer,
+        batch_size=cfg.batch_size,
+        interaction_conf=cfg.interaction,
+    )
+
+
+
 
 
 

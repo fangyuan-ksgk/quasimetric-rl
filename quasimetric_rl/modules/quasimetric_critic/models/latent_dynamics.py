@@ -46,6 +46,8 @@ class LatentDynamics(MLP):
 
     def forward(self, zx: LatentTensor, action: torch.Tensor) -> LatentTensor:
         # broadcast batch shapes before cat
+        # Q. In what scenarios is the batch shape different?
+        # -- one state, one action -> one next state || why is batchshape different?
         action = self.action_input(action)
         broadcast_bshape: torch.Size = torch.broadcast_shapes(zx.shape[:-1], action.shape[:-1])
         zx = zx.expand(broadcast_bshape + zx.shape[-1:])
@@ -54,7 +56,7 @@ class LatentDynamics(MLP):
         zy = super().forward(
             torch.cat([zx, action], dim=-1)
         )
-        if self.residual:
+        if self.residual: # addition residual-connection
             zy = zx + zy
         return zy
 
