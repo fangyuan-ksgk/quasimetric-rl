@@ -41,7 +41,7 @@ class Actor(nn.Module):
                             zero_init_last_fc=True)
 
     def forward(self, o: torch.Tensor, g: torch.Tensor) -> torch.distributions.Distribution:
-        og = torch.stack([o, g], dim=-len(self.observation_shape) - 1)
+        og = torch.stack([o, g], dim=-len(self.observation_shape) - 1) # Why is the dimension expression nessary?
         return self.action_output(self.backbone(self.observation_encoding(og).flatten(-2, -1)))
 
     # for type hint

@@ -130,25 +130,20 @@ def train(dict_cfg: DictConfig):
     print('Default --- Components number: ', quasimetric_model.quasimetric_head.num_components, '| reduction method: ', quasimetric_model.quasimetric_head.reduction, 
     '| transforms:', quasimetric_model.quasimetric_head.transforms, '| discount: ', quasimetric_model.quasimetric_head.discount)
 
-    # Test on Encoder output shape w. environment
-    # Question: How to port environment into the encoder?
-    # --- how to run the online environment w. replay buffer?
-    # print('------------------------------')
-    # print('Test on Encoder output shape')
-    # batch_size = 4
-    # env = replay_buffer.env
-    # observation = env.reset()
-    # print('observation shape: ', observation.shape)
-    # observation = torch.from_numpy(observation).unsqueeze(0)
-    # print('observation shape: ', observation.shape)
-    # encoder_output = encoder(observation)
-    # print('Encoder output shape: ', encoder_output.shape)
 
     print('Check for Apple GPU support')
     print(torch.backends.mps.is_available())
     print('------------------------------')
 
+    # Test with Agent.Actor
+    print('Test with Agent.Actor -- actor_cfg: ', actor_cfg)
+    try:
+        actor = actor_cfg.make(env_spec=replay_buffer.env_spec, total_optim_steps=1)
+    except:
+        print('No Actor specified in the Agent Configuration')
+    print('------------------------------')
 
+    # Without Actor, train_step() function will need to be modified (?)
     # To learn how to run online environment, look into the Trainer class
     # -- bugs in the loss function calculation | likely another type issue with different environment?
     trainer = Trainer(
@@ -159,6 +154,27 @@ def train(dict_cfg: DictConfig):
         interaction_conf=cfg.interaction,
     )
 
+    # Test with train-step
+    print('------------------------------')
+    print('Test with trainer.evaluate() | call on collect_rollout() which requires actor policy model')
+    trainer.evaluate()
+
+    
+    # print('------------------------------')
+    # print('Test with train-step')
+    # for optim_steps, (env_steps, next_iter_new_env_step, data, data_info) in enumerate(trainer.iter_training_data(), start=1):
+    #     # Issue: -- Can not even load the data here
+
+    #     # iter_t0 = time.time()
+    #     # train_info = trainer.train_step(data)
+    #     # iter_time = time.time() - iter_t0
+    #     break
+    # print('Train-step success')
+
+    # Issue with memory collect_rollout() function on the environment (check)
+    # print('------------------------------')
+    # print('Test with collect_rollout')
+    # for optim_steps, (env_steps, next_iter_new_env_step, data, data_info) in enumerate(trainer.iter_training_data(), start=1):
 
 
 

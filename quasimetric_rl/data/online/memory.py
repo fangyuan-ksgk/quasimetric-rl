@@ -247,7 +247,7 @@ class ReplayBuffer(Dataset):
         t = 0
         timeout = False
         while not timeout:
-            # here the actor is actually called to make decisitions
+            # here the actor is actually called to make decisitions | goal conditioned policy
             action = actor(
                 observation,
                 goal,

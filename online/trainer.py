@@ -53,7 +53,7 @@ class InteractionConf:
     exploration_eps: float = attrs.field(default=0.3, validator=attrs.validators.ge(0))
 
 
-class Trainer(object):
+class Trainer(object): # This is equivalent ot class Trainer: // object is the parent class of all classes in Python
     agent: QRLAgent
     losses: QRLLosses
     device: torch.device
@@ -125,13 +125,14 @@ class Trainer(object):
 
     def collect_random_rollout(self, *, store: bool = True, env: Optional[FixedLengthEnvWrapper] = None) -> EpisodeData:
         rollout = self.replay.collect_rollout(
-            lambda obs, goal, space: space.sample(),
+            lambda obs, goal, space: space.sample(), # this is supposed to be the goal-conditioned policy model
             env=env,
         )
         if store:
             self.replay.add_rollout(rollout)
         return rollout
 
+    # Looks like this would not work without actor function | actor function is defined in quasimetric_rl/modules/actor/model.py
     def collect_rollout(self, *, eval: bool = False, store: bool = True,
                         env: Optional[FixedLengthEnvWrapper] = None) -> EpisodeData:
         assert self.agent.actor is not None
@@ -139,7 +140,7 @@ class Trainer(object):
         @torch.no_grad()
         def actor(obs: torch.Tensor, goal: torch.Tensor, space: gym.spaces.Space):
             with self.agent.mode(False):
-                adistn = self.agent.actor(obs[None].to(self.device), goal[None].to(self.device))
+                adistn = self.agent.actor(obs[None].to(self.device), goal[None].to(self.device)) # wonder what type is this
             if eval:
                 a = adistn.mode.cpu().numpy()[0]
             else:
@@ -182,6 +183,11 @@ class Trainer(object):
             info,
         )
         """
+        # What is this function doing, section by section?
+        # 1. Collect random rollout
+        # 2. Collect rollout
+        # 3. Yield data
+        # 4. Train step
         def yield_data():
             num_transitions = self.replay.num_transitions_realized
             for icyc in tqdm(range(self.num_samples_per_cycle), desc=f"{num_transitions} env steps, train batches"):
