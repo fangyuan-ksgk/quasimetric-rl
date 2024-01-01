@@ -135,31 +135,61 @@ def train(dict_cfg: DictConfig):
     print(torch.backends.mps.is_available())
     print('------------------------------')
 
-    # Test with Agent.Actor
-    print('Test with Agent.Actor -- actor_cfg: ', actor_cfg)
-    try:
-        actor = actor_cfg.make(env_spec=replay_buffer.env_spec, total_optim_steps=1)
-    except:
-        print('No Actor specified in the Agent Configuration')
+    # Test with Agent.Actor.model
+    print('Test with Agent.Actor')
+    actor_model_cfg = actor_cfg.model
+    actor_loss_cfg = actor_cfg.losses
+    policy_model = actor_model_cfg.make(env_spec=replay_buffer.env_spec)
+    print('Policy model make success')
+    print(policy_model)
     print('------------------------------')
+
+    # Unlock Discrete Action Distribution Sampling Steps' Gradient Flow
+    # basically the following two lines of code, second should be replaced by ST / ReinMax functional
+    # Latent-space embedded observation & goal state shall be sampled from the latent space
+    obs = ?
+    goal = ?
+    # Copilot, give me two instances of obs / goal
+    # -- Need to load a databatch from the replay buffer | MinDistLoss.gather_obs_goal_pairs()
+    # -- 
+    actor_distn = policy_model(obs, goal)
+    action = actor_distn.rsample()
+
+
+
+    # Test with Agent.Actor.losses
+    # print('Test with Agent.Actor.losses')
+    # actor_loss = actor_loss_cfg.make(actor=policy_model, env_spec=replay_buffer.env_spec, total_optim_steps=1)
+    # print('Actor loss make success')
+    # print('------------------------------')
+
+
+    # print('Test with Agent.Actor -- actor_cfg: ', actor_cfg)
+    # actor = actor_cfg.make(env_spec=replay_buffer.env_spec, total_optim_steps=1)
+    # print('Actor make success')
+    # print('------------------------------')
 
     # Without Actor, train_step() function will need to be modified (?)
     # To learn how to run online environment, look into the Trainer class
     # -- bugs in the loss function calculation | likely another type issue with different environment?
-    trainer = Trainer(
-        agent_conf=cfg.agent,
-        device=cfg.device.make(),
-        replay=replay_buffer,
-        batch_size=cfg.batch_size,
-        interaction_conf=cfg.interaction,
-    )
+    # trainer = Trainer(
+    #     agent_conf=cfg.agent,
+    #     device=cfg.device.make(),
+    #     replay=replay_buffer,
+    #     batch_size=cfg.batch_size,
+    #     interaction_conf=cfg.interaction,
+    # )
 
     # Test with train-step
-    print('------------------------------')
-    print('Test with trainer.evaluate() | call on collect_rollout() which requires actor policy model')
-    trainer.evaluate()
-
+    # Error: Disabled Actor model leads to in-ability to collect_rollout
+    # --- is the quasimetric critic useless without an actor model ?
+    # print('------------------------------')
+    # print('Test with trainer.evaluate() | call on collect_rollout() which requires actor policy model')
     
+    # trainer.evaluate()
+
+
+
     # print('------------------------------')
     # print('Test with train-step')
     # for optim_steps, (env_steps, next_iter_new_env_step, data, data_info) in enumerate(trainer.iter_training_data(), start=1):

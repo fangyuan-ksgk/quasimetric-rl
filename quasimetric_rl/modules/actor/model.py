@@ -11,7 +11,7 @@ from ...data import EnvSpec
 from ...data.env_spec.input_encoding import InputEncoding
 from ...data.env_spec.act_distn import ActionOutputConverter
 
-
+# Interesting Point here is forward gives a distribution: torch.distributions.Distribution
 class Actor(nn.Module):
     @attrs.define(kw_only=True)
     class Conf:

@@ -6,7 +6,8 @@ import time
 import attrs
 import logging
 
-import gym.spaces
+import gymnasium.spaces
+from gymnasium.utils import seeding
 import numpy as np
 import torch
 import torch.utils.data
@@ -16,6 +17,12 @@ from quasimetric_rl.data import BatchData, EpisodeData, MultiEpisodeData
 from quasimetric_rl.data.online import ReplayBuffer, FixedLengthEnvWrapper
 from quasimetric_rl.utils import tqdm
 
+# Minigrid Env requires custom seeding
+def custom_seed_env(env, seed):
+    set_seed = seeding.np_random(seed)
+    # print('Set seed: ', set_seed[0], ' || from value: ', set_seed[1])
+    env.unwrapped._np_random = set_seed[0]
+    return env
 
 def first_nonzero(arr: torch.Tensor, dim: bool = -1, invalid_val: int = -1):
     mask = (arr != 0)
@@ -115,7 +122,10 @@ class Trainer(object): # This is equivalent ot class Trainer: // object is the p
         # a hack to expose more signal from some envs :)
         if hasattr(env, 'reward_mode') and len(self.replay.env_spec.observation_shape) == 1:
             env.unwrapped.reward_mode = 'dense'
-        env.seed(self.eval_seed)
+        try:
+            env.unwrapped.seed(self.eval_seed)
+        except:
+            env = custom_seed_env(env, self.eval_seed)
         return env
 
     def sample(self) -> BatchData:

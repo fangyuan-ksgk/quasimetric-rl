@@ -81,6 +81,10 @@ class MinDistLoss(ActorLossBase):
         )
         """
 
+        # local cost should not be over-estimated
+        # -- current understaing
+        # -- 1. for each observation at time t, time t+1 & time t+2's observation are considered as goal
+        # -- 2. then we naturally have 2*T number of state-goal pairs, here it looks like the batch size multiplied by 2, compared to the observation's batch size
         obs = data.observations
         goal = torch.roll(data.next_observations, 1, dims=0)  # randomize :)
         if self.add_goal_as_future_state:
@@ -107,7 +111,7 @@ class MinDistLoss(ActorLossBase):
                 zo=zo,
                 zg=zg,
             ))
-
+        # (!) here the obs & goal are the un-encoded observation & goal
         return obs, goal, actor_obs_goal_critic_infos
 
     def forward(self, actor: Actor, critic_batch_infos: Collection[CriticBatchInfo], data: BatchData) -> LossResult:
@@ -115,7 +119,7 @@ class MinDistLoss(ActorLossBase):
             obs, goal, actor_obs_goal_critic_infos = self.gather_obs_goal_pairs(critic_batch_infos, data)
 
         actor_distn = actor(obs, goal)
-        action = actor_distn.rsample()
+        action = actor_distn.rsample() # This Sampling Step blocks gradient flow -- need replacement
 
         info: Dict[str, torch.Tensor] = {}
 

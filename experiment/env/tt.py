@@ -18,3 +18,21 @@ while True:
     env.render()
     if done:
         break
+
+print('------------------------------')
+print('Test with env.unwrapped.seed()')
+# env.seed is deprecated, use env.unwrapped.seed instead
+print('._np_random: ', env.unwrapped._np_random)
+print('.np_random: ', env.unwrapped.np_random)
+# can we reset & change the np_random?
+from gymnasium.utils import seeding
+seed = 0
+set_seed = seeding.np_random(seed)
+print('Set seed: ', set_seed[0], ' || from value: ', set_seed[1])
+def custom_seed_env(env, seed):
+    set_seed = seeding.np_random(seed)
+    print('Set seed: ', set_seed[0], ' || from value: ', set_seed[1])
+    env.unwrapped._np_random = set_seed[0]
+    return env
+env = custom_seed_env(env, seed)
+print('Custom seeding env -- np_random: ', env.unwrapped.np_random)
