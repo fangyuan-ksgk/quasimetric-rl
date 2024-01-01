@@ -276,7 +276,7 @@ class ReplayBuffer(Dataset):
     
     def add_rollout(self, episode: EpisodeData):
         # looks like this function basically expands dataset from [self.num_episodes_realized, *] to [self.num_episodes_realized+1, *]
-        # and then replace the dummny data in the new episode with the real data in the episode
+        # and then replace the dummny data in the new episozde with the real data in the episode
         if self.num_episodes_realized == self.episodes_capacity:
             self._expand()
         # 0 is the dimension to unflatten, we basically reshape the first dimension into [self.episodes_capacity, self.episode_length+1]-shaped tensor.

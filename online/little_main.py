@@ -147,8 +147,8 @@ def train(dict_cfg: DictConfig):
     # Unlock Discrete Action Distribution Sampling Steps' Gradient Flow
     # basically the following two lines of code, second should be replaced by ST / ReinMax functional
     # Latent-space embedded observation & goal state shall be sampled from the latent space
-    obs = ?
-    goal = ?
+    # obs = ?
+    # goal = ?
     # Copilot, give me two instances of obs / goal
     # -- Need to load a databatch from the replay buffer | MinDistLoss.gather_obs_goal_pairs()
     # -- 

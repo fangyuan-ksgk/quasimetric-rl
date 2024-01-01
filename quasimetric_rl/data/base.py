@@ -183,6 +183,7 @@ def register_offline_env(kind: str, spec: str, *, load_episodes_fn, create_env_f
     LOAD_EPISODES_REGISTRY[(kind, spec)] = load_episodes_fn
     CREATE_ENV_REGISTRY[(kind, spec)] = create_env_fn
 
+
 # .make() function converts name_config into an environment, wrapped in a Dataset object
 # --- recall that the quasi-RL requires ability to sample from initial/goal states, which is why such wrapper might be needed
 # we need to switch to some other environment compatible with M1 chips here

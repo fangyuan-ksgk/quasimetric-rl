@@ -21,7 +21,7 @@ FieldT = TypeVar(
     'TensorCollectionAttrsMixin', NestedMapping['TensorCollectionAttrsMixin'],
 )
 
-
+# Abstract class
 class TensorCollectionAttrsMixin(abc.ABC):
     # All fields must be one of
     #    torch.Tensor
@@ -119,7 +119,8 @@ class TensorCollectionAttrsMixin(abc.ABC):
                     }
 
                 return cat_map(field_values)
-
+        # Concatenate on all the attributes registered with attrs -- cls.types_dict()
+        # Then initialize a new instance of the class with the concatenated attributes
         return cls(**{k: cat_key(k) for k in types.keys()})
 
     @staticmethod
